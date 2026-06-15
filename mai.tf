@@ -1,5 +1,5 @@
 # =========================================================
-# TERRAFORM + AWS EKS PRODUCTION SETUP
+# TERRAFORM + AWS EKS LATEST PRODUCTION SETUP
 # File: main.tf
 # =========================================================
 
@@ -9,7 +9,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.100"
+      version = "~> 6.50"
     }
   }
 }
@@ -37,7 +37,7 @@ variable "cluster_name" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.8.1"
+  version = "6.6.1"
 
   name = "eks-vpc"
 
@@ -62,6 +62,7 @@ module "vpc" {
   single_nat_gateway = true
 
   enable_dns_hostnames = true
+  enable_dns_support   = true
 
   public_subnet_tags = {
     "kubernetes.io/role/elb" = "1"
@@ -83,24 +84,27 @@ module "vpc" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "20.37.2"
+  version = "21.19.0"
 
   # =========================================================
   # CLUSTER
   # =========================================================
 
   cluster_name    = var.cluster_name
-  cluster_version = "1.34"
+  cluster_version = "1.36"
 
   cluster_endpoint_public_access = true
 
   authentication_mode = "API_AND_CONFIG_MAP"
 
   enable_cluster_creator_admin_permissions = true
-  enable_irsa                                   = true
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
+
+  compute_config = {
+    enabled = false
+  }
 
   # =========================================================
   # EKS ADDONS
