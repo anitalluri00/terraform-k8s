@@ -1,5 +1,5 @@
 # =========================================================
-# TERRAFORM + AWS EKS (LATEST STABLE PRODUCTION SETUP)
+# TERRAFORM + AWS EKS PRODUCTION SETUP
 # File: main.tf
 # =========================================================
 
@@ -83,17 +83,13 @@ module "vpc" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-
-  # Latest stable v20 release
-  version = "20.31.6"
+  version = "20.37.2"
 
   # =========================================================
   # CLUSTER
   # =========================================================
 
   cluster_name    = var.cluster_name
-
-  # Latest supported EKS version in stable provider/module
   cluster_version = "1.34"
 
   cluster_endpoint_public_access = true
@@ -101,37 +97,44 @@ module "eks" {
   authentication_mode = "API_AND_CONFIG_MAP"
 
   enable_cluster_creator_admin_permissions = true
+  enable_irsa                                   = true
 
-  enable_irsa = true
-
-  vpc_id = module.vpc.vpc_id
-
+  vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
   # =========================================================
-  # EKS ADDONS (LATEST)
+  # EKS ADDONS
   # =========================================================
 
   cluster_addons = {
-
     coredns = {
-      most_recent = true
+      most_recent                 = true
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
     }
 
     kube-proxy = {
-      most_recent = true
+      most_recent                 = true
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
     }
 
     vpc-cni = {
-      most_recent = true
+      most_recent                 = true
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
     }
 
     eks-pod-identity-agent = {
-      most_recent = true
+      most_recent                 = true
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
     }
 
     aws-ebs-csi-driver = {
-      most_recent = true
+      most_recent                 = true
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
     }
   }
 
@@ -140,13 +143,9 @@ module "eks" {
   # =========================================================
 
   eks_managed_node_groups = {
-
     general = {
-
-      # Latest Amazon Linux 2023 AMI
       ami_type = "AL2023_x86_64_STANDARD"
 
-      # Latest recommended compute
       instance_types = ["t3.large"]
 
       capacity_type = "ON_DEMAND"
